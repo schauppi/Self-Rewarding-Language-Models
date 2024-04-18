@@ -4,16 +4,18 @@ from trl import SFTTrainer
 import os
 import wandb
 from accelerate import Accelerator
+import datetime
 
 os.environ["WANDB_PROJECT"]="Self Rewarding Language Models"
 
 class Trainer:
     def __init__(self):
-        self.output_dir = './results'
+        current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        self.output_dir = f'./results/results_{current_datetime}'
 
     def train(self, model, tokenizer, lora_config, dataset, accelerator):
         learning_rate = 2e-4
-        batch_size = 4
+        batch_size = 8
         max_seq_length = 1024
 
         training_args = TrainingArguments(

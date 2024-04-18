@@ -3,7 +3,7 @@ from src.utils.model import load_model, create_peft_model
 from src.utils.trainer import Trainer
 import os
 from datasets import load_dataset
-from accelerate import Accelerator, DataLoaderConfiguration
+from accelerate import Accelerator
 
 base_path = os.path.dirname(__file__)
 dataset_path = os.path.join(base_path, '..', 'data/ift.jsonl')
