@@ -14,8 +14,8 @@ class Trainer:
         self.output_dir = f'./results/results_{current_datetime}'
 
     def train(self, model, tokenizer, lora_config, dataset, accelerator):
-        learning_rate = 2e-4
-        batch_size = 8
+        learning_rate = 3e-4
+        batch_size = 4
         max_seq_length = 1024
 
         training_args = TrainingArguments(
@@ -24,8 +24,10 @@ class Trainer:
             learning_rate=learning_rate,
             gradient_accumulation_steps=4,
             warmup_steps=30,
+            weight_decay=0.001,
             logging_steps=1,
             num_train_epochs=1,
+            lr_scheduler_type="cosine",
             save_steps=50,
             report_to="wandb",)
 
