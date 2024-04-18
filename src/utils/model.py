@@ -29,7 +29,7 @@ def load_model(tokenizer_name, model_name):
 
 def create_peft_model(model):
     lora_dropout=0.1
-    lora_alpha=16
+    lora_alpha=128
     lora_r=64
 
     peft_config = LoraConfig(
