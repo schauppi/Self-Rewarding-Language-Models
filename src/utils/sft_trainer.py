@@ -8,13 +8,13 @@ import datetime
 
 os.environ["WANDB_PROJECT"]="Self Rewarding Language Models"
 
-class Trainer:
+class TrainerSFT:
     def __init__(self):
         current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         self.output_dir = f'./results/results_{current_datetime}'
 
     def train(self, model, tokenizer, lora_config, dataset, accelerator):
-        learning_rate = 3e-4
+        learning_rate=5e-5
         batch_size = 4
         max_seq_length = 1024
 
@@ -28,6 +28,7 @@ class Trainer:
             logging_steps=1,
             num_train_epochs=1,
             lr_scheduler_type="cosine",
+            optim="paged_adamw_32bit",
             save_steps=50,
             report_to="wandb",)
 
