@@ -1,6 +1,6 @@
 # Assuming your script is set up as mentioned previously:
 from src.utils.model import load_model, create_peft_model
-from src.utils.trainer import Trainer
+from utils.sft_trainer import TrainerSFT
 import os
 from datasets import load_dataset
 from accelerate import Accelerator
@@ -25,5 +25,5 @@ dataset = dataset["train"].shuffle(seed=42)
 dataset = dataset.map(lambda x: create_chat_template(tokenizer, x))
 
 model, lora_config = create_peft_model(model)
-trainer = Trainer()
+trainer = TrainerSFT()
 trainer.train(model, tokenizer, lora_config, dataset, accelerator)
