@@ -1,7 +1,5 @@
 import os
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-
 import torch 
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import get_peft_model, LoraConfig, TaskType, prepare_model_for_kbit_training
@@ -21,7 +19,6 @@ def load_model(tokenizer_name, model_name):
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = AutoModelForCausalLM.from_pretrained(model_name,
                                                  quantization_config=bnb_config,)
     model.config.pretraining_tp = 1
