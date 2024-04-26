@@ -1,0 +1,21 @@
+base_path: "base"
+data_directory: "../data/"
+model_directory: "../../results/"
+
+cuda_visible_devices: "0"
+
+model_name: "mistralai/Mistral-7B-v0.1"
+tokenizer_name: "mistralai/Mistral-7B-v0.1"
+
+peft_config:
+  target_modules:
+    - "q_proj"
+    - "k_proj"
+    - "v_proj"
+    - "o_proj"
+    - "gate_proj"
+  lora_dropout: 0.5
+  lora_alpha: 16
+  lora_r: 16
+
+iterations: 5
