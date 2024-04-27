@@ -1,11 +1,12 @@
-base_path: "base"
-data_directory: "../data/"
-model_directory: "../../results/"
-
+# Static configuration
 cuda_visible_devices: "0"
-
 model_name: "mistralai/Mistral-7B-v0.1"
 tokenizer_name: "mistralai/Mistral-7B-v0.1"
+ift_dataset: "ift.jsonl"
+
+data_directory: "data"
+ift_dataset: "data/ift.jsonl"
+model_directory: "results"
 
 peft_config:
   target_modules:
