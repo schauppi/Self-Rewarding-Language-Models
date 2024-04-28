@@ -1,16 +1,26 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
-from peft import get_peft_model, LoraConfig, TaskType, prepare_model_for_kbit_training
+from peft import (
+    get_peft_model,
+    LoraConfig,
+    TaskType,
+    prepare_model_for_kbit_training,
+    load_peft_weights,
+    set_peft_model_state_dict,
+)
+
 
 from src.utils.logging.logging_config import setup_logging
 import logging
 
 
 class ModelLoader:
-    def __init__(self, config):
+    def __init__(self, config, adapter=False, adapter_path=None):
         self.model_name = config["model_name"]
         self.tokenizer_name = config["tokenizer_name"]
         self.peft_config = config["peft_config"]
+        self.adapter = adapter
+        self.adapter_path = adapter_path
         setup_logging()
         self.logger = logging.getLogger()
         self.bnb_config = self.get_bnb_config()
@@ -49,6 +59,10 @@ class ModelLoader:
             model = AutoModelForCausalLM.from_pretrained(
                 self.model_name, quantization_config=self.bnb_config
             )
+            if self.adapter:
+                self.logger.info("Loading Lora Weights")
+                lora_weights = load_peft_weights(self.adapter_path)
+                _ = model.load_state_dict(lora_weights, strict=False)
             model.config.pretraining_tp = 1
             return model
         except Exception as e:
