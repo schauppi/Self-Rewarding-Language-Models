@@ -1,4 +1,4 @@
-prompt_01 = """
+prompt_step_01 = """
 
 Come up with a series of tasks and questions. Only the task/question,
 no further text/explanation, no additional information.

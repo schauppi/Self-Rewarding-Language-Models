@@ -4,19 +4,18 @@ from trl import SFTTrainer
 import os
 import wandb
 from accelerate import Accelerator
-import datetime
 
-os.environ["WANDB_PROJECT"]="Self Rewarding Language Models"
 
 class TrainerSFT:
-    def __init__(self):
-        current_datetime = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        self.output_dir = f'./results/results_{current_datetime}'
+    def __init__(self, config):
+        self.output_dir = str(config["experiment_dir"] / "sft")
+        self.accelerator = Accelerator()
+        self.sft_training_params = config["sft_training"]
 
-    def train(self, model, tokenizer, lora_config, dataset, accelerator):
-        learning_rate=5e-5
-        batch_size = 4
-        max_seq_length = 1024
+    def train(self, model, tokenizer, lora_config, dataset):
+        learning_rate = float(self.sft_training_params["learning_rate"])
+        batch_size = self.sft_training_params["batch_size"]
+        max_seq_length = self.sft_training_params["max_seq_length"]
 
         training_args = TrainingArguments(
             output_dir=self.output_dir,
@@ -30,7 +29,8 @@ class TrainerSFT:
             lr_scheduler_type="cosine",
             optim="paged_adamw_32bit",
             save_steps=50,
-            report_to="wandb",)
+            report_to="wandb",
+        )
 
         trainer = SFTTrainer(
             model=model,
@@ -39,11 +39,10 @@ class TrainerSFT:
             max_seq_length=max_seq_length,
             tokenizer=tokenizer,
             args=training_args,
-            dataset_text_field="text")
+            dataset_text_field="text",
+        )
 
-        model, trainer = accelerator.prepare(model, trainer)
+        model, trainer = self.accelerator.prepare(model, trainer)
 
         trainer.train()
-
-        output_dir = os.path.join(self.output_dir, "model")
-        trainer.model.save_pretrained(output_dir)
+        trainer.model.save_pretrained(self.output_dir)

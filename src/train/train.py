@@ -4,25 +4,45 @@ import logging
 from src.utils.logging.logging_config import setup_logging
 from src.utils.ModelLoader import ModelLoader
 from src.utils.ConfigLoader import ConfigLoader
-
-from datasets import load_dataset
+from src.utils.create_sft_dataset import create_sft_dataset
+from src.utils.SFTTrainer import TrainerSFT
+from src.utils.generate_prompts import generate_new_prompts
 
 setup_logging()
 logger = logging.getLogger()
 
-
 config_loader = ConfigLoader()
 config = config_loader.config
 
-# print the paths
-logger.info(f"Data path: {config['data_path']}")
-logger.info(f"Model directory path: {config['model_dir_path']}")
-
 os.environ["CUDA_VISIBLE_DEVICES"] = config["cuda_visible_devices"]
-logger.info(f"Visible CUDA devices: {os.environ['CUDA_VISIBLE_DEVICES']}")
+os.environ["WANDB_PROJECT"] = config["wandb_project"]
 
-# initial fine tune
-model = ModelLoader(config).model
+###STEP1###
+"""loader = ModelLoader(config)
+model, tokenizer, lora_config = loader.model, loader.tokenizer, loader.lora_config
+
+dataset = create_sft_dataset(
+    dataset_path=(config["data_path"] / config["ift_dataset"]), tokenizer=tokenizer
+)
+sft_trainer = TrainerSFT(config=config)
+sft_adapter_path = sft_trainer.output_dir
+sft_trainer = sft_trainer.train(
+    model=model, tokenizer=tokenizer, lora_config=lora_config, dataset=dataset
+)"""
+###STEP1###
+
+###LOOP###
+
+iteration = 0
+
+###STEP2###
+sft_adapter_path = "/home/ds/workspace/Self-Rewarding-Language-Models/results/results_2024-04-28_16-53-58/sft"
+
+loader = ModelLoader(config, adapter=True, adapter_path=sft_adapter_path)
+model, tokenizer, lora_config = loader.model, loader.tokenizer, loader.lora_config
+generate_new_prompts(model, tokenizer, config, iteration)
+###STEP2###
+
 
 """
 for iteration in range(num_iterations):

@@ -2,11 +2,12 @@
 cuda_visible_devices: "0"
 model_name: "mistralai/Mistral-7B-v0.1"
 tokenizer_name: "mistralai/Mistral-7B-v0.1"
-ift_dataset: "ift.jsonl"
 
 data_directory: "data"
-ift_dataset: "data/ift.jsonl"
+ift_dataset: "ift_short.jsonl"
 model_directory: "results"
+
+wandb_project: "Self Rewarding Language Models"
 
 peft_config:
   target_modules:
@@ -20,3 +21,11 @@ peft_config:
   lora_r: 16
 
 iterations: 5
+
+sft_training:
+  learning_rate: 5e-5
+  batch_size: 4
+  max_seq_length: 1024
+
+generate_prompts:
+  new_prompts: 10
