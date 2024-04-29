@@ -13,7 +13,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 
-def get_random_prompts(data, num_prompts=8):
+def get_random_prompts(data, num_prompts=5):
     try:
         return data.sample(n=num_prompts)["prompt"].tolist()
     except Exception as e:
@@ -100,6 +100,8 @@ def generate_new_prompts(model, tokenizer, config, iteration):
         new_prompts_df = pd.DataFrame(new_prompts)
         output_dir = config["data_path"] / f"{iteration}"
         os.makedirs(output_dir, exist_ok=True)
-        write_jsonl_file(new_prompts_df, (output_dir / "gen_prompts.jsonl"))
+        output_path = output_dir / "gen_prompts.jsonl"
+        write_jsonl_file(new_prompts_df, output_path)
+        return output_path
     except Exception as e:
         logger.error(f"Error in generate_new_prompts: {e}")

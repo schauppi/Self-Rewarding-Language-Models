@@ -7,6 +7,8 @@ from src.utils.ConfigLoader import ConfigLoader
 from src.utils.create_sft_dataset import create_sft_dataset
 from src.utils.SFTTrainer import TrainerSFT
 from src.utils.generate_prompts import generate_new_prompts
+from src.utils.generate_responses import generate_responses
+from src.utils.generate_scores import generate_scores
 
 setup_logging()
 logger = logging.getLogger()
@@ -40,9 +42,18 @@ sft_adapter_path = "/home/ds/workspace/Self-Rewarding-Language-Models/results/re
 
 loader = ModelLoader(config, adapter=True, adapter_path=sft_adapter_path)
 model, tokenizer, lora_config = loader.model, loader.tokenizer, loader.lora_config
-generate_new_prompts(model, tokenizer, config, iteration)
+prompts_path = generate_new_prompts(model, tokenizer, config, iteration)
 ###STEP2###
 
+###STEP3###
+responses_path = generate_responses(model, tokenizer, config, iteration, prompts_path)
+###STEP3###
+
+###STEP4###
+scores_path = generate_scores(model, tokenizer, config, iteration, responses_path)
+###STEP4###
+
+print(scores_path)
 
 """
 for iteration in range(num_iterations):
