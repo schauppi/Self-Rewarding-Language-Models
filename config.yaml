@@ -28,4 +28,7 @@ sft_training:
   max_seq_length: 1024
 
 generate_prompts:
-  new_prompts: 10
+  new_prompts: 1
+
+response_prompts:
+  new_prompts: 1
