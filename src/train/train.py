@@ -23,7 +23,8 @@ os.environ["CUDA_VISIBLE_DEVICES"] = config["cuda_visible_devices"]
 os.environ["WANDB_PROJECT"] = config["wandb_project"]
 
 ###STEP1###
-"""loader = ModelLoader(config)
+logger.info("Step 0: Training SFT model")
+loader = ModelLoader(config)
 model, tokenizer, lora_config = loader.model, loader.tokenizer, loader.lora_config
 
 dataset = create_sft_dataset(
@@ -33,49 +34,57 @@ sft_trainer = TrainerSFT(config=config)
 sft_adapter_path = sft_trainer.output_dir
 sft_trainer = sft_trainer.train(
     model=model, tokenizer=tokenizer, lora_config=lora_config, dataset=dataset
-)"""
+)
 ###STEP1###
 
 ###LOOP###
 
-iteration = 0
+for iteration in range(config["iterations"]):
+    logger.info(f"Starting iteration {iteration}")
 
-"""
-###STEP2###
-sft_adapter_path = "/home/ds/workspace/Self-Rewarding-Language-Models/results/results_2024-04-28_16-53-58/sft"
+    ###STEP2###
+    logger.info(f"Step 1 | iteration {iteration}: Generating new prompts")
+    if iteration == 0:
+        loader = ModelLoader(config, adapter=True, adapter_path=sft_adapter_path)
+    else:
+        loader = ModelLoader(config, adapter=True, adapter_path=dpo_adapter_path)
+    model, tokenizer, lora_config = loader.model, loader.tokenizer, loader.lora_config
+    prompts_path = generate_new_prompts(model, tokenizer, config, iteration)
+    ###STEP2###
 
-loader = ModelLoader(config, adapter=True, adapter_path=sft_adapter_path)
-model, tokenizer, lora_config = loader.model, loader.tokenizer, loader.lora_config
-prompts_path = generate_new_prompts(model, tokenizer, config, iteration)
-###STEP2###
+    ###STEP3###
+    logger.info(f"Step 2 | iteration {iteration}: Generating responses")
+    responses_path = generate_responses(
+        model, tokenizer, config, iteration, prompts_path
+    )
+    ###STEP3###
 
-###STEP3###
-responses_path = generate_responses(model, tokenizer, config, iteration, prompts_path)
-###STEP3###
+    ###STEP4###
+    logger.info(f"Step 3 | iteration {iteration}: Generating scores")
+    scores_path = generate_scores(model, tokenizer, config, iteration, responses_path)
+    ###STEP4###
 
-###STEP4###
-scores_path = generate_scores(model, tokenizer, config, iteration, responses_path)
-###STEP4###
+    ###STEP5###
+    logger.info(f"Step 4 | iteration {iteration}: Generating preferences")
+    preferences_path = generate_preferences(config, iteration, scores_path)
+    ###STEP5###
 
-###STEP5###
-preferences_path = generate_preferences(config, iteration, scores_path)
-###STEP5###
-"""
+    ###STEP6###
+    """
+    preferences_path = "/home/ds/workspace/Self-Rewarding-Language-Models/src/data/0/preference_pairs.jsonl"
+    sft_adapter_path = "/home/ds/workspace/Self-Rewarding-Language-Models/results/results_2024-05-07_12-46-38/sft"
 
-###STEP6###
-preferences_path = "/home/ds/workspace/Self-Rewarding-Language-Models/src/data/0/preference_pairs.jsonl"
-sft_adapter_path = "/home/ds/workspace/Self-Rewarding-Language-Models/results/results_2024-04-28_16-53-58/sft"
+    loader = ModelLoader(config, adapter=True, adapter_path=sft_adapter_path)
+    model, tokenizer, lora_config = loader.model, loader.tokenizer, loader.lora_config"""
 
-loader = ModelLoader(config, adapter=True, adapter_path=sft_adapter_path)
-model, tokenizer, lora_config = loader.model, loader.tokenizer, loader.lora_config
+    logger.info(f"Step 5 | iteration {iteration}: Training DPO model")
+    dpo_dataset = generate_dpo_dataset(preferences_path, tokenizer)
 
-dpo_dataset = generate_dpo_dataset(preferences_path, tokenizer)
-
-dpo_trainer = TrainerDPO(config=config)
-dpo_adapter_path = dpo_trainer.output_dir
-dpo_trainer = dpo_trainer.train(
-    model=model, tokenizer=tokenizer, lora_config=lora_config, dataset=dpo_dataset
-)
+    dpo_trainer = TrainerDPO(config=config)
+    dpo_adapter_path = dpo_trainer.output_dir
+    dpo_trainer = dpo_trainer.train(
+        model=model, tokenizer=tokenizer, lora_config=lora_config, dataset=dpo_dataset
+    )
 
 ###STEP6###
 

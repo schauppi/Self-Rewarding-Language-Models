@@ -9,20 +9,25 @@ logger = logging.getLogger()
 
 
 def get_prompt(example, tokenizer):
-    prompt_sample = [{"role": "user", "content": example["prompt"]}]
+    try:
+        prompt_sample = [{"role": "user", "content": example["prompt"]}]
 
-    model_prompt = tokenizer.apply_chat_template(prompt_sample, tokenize=False)
-    example["prompt"] = model_prompt
-    example["chosen"] = example["chosen"]
-    example["rejected"] = example["rejected"]
+        model_prompt = tokenizer.apply_chat_template(prompt_sample, tokenize=False)
+        example["prompt"] = model_prompt
+        example["chosen"] = example["chosen"]
+        example["rejected"] = example["rejected"]
 
-    return example
+        return example
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        return ""
 
 
 def generate_dpo_dataset(preferences_path, tokenizer):
     try:
         logger.info(f"Generating DPO dataset from preferences: {preferences_path}")
-        dataset = load_dataset("json", data_files={"train": preferences_path})
+        preferences_path_str = str(preferences_path)
+        dataset = load_dataset("json", data_files={"train": preferences_path_str})
         dataset = dataset["train"].shuffle(seed=42)
         dataset = dataset.map(lambda data: get_prompt(data, tokenizer))
         return dataset
