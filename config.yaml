@@ -27,8 +27,14 @@ sft_training:
   batch_size: 4
   max_seq_length: 1024
 
+dpo_training:
+  learning_rate: 5e-5
+  batch_size: 4
+  max_seq_length: 1024
+  max_prompt_length: 1024
+
 generate_prompts:
-  new_prompts: 1
+  new_prompts: 4
 
 response_prompts:
-  new_prompts: 1
+  new_prompts: 4

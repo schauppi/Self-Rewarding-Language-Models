@@ -6,9 +6,12 @@ from src.utils.ModelLoader import ModelLoader
 from src.utils.ConfigLoader import ConfigLoader
 from src.utils.create_sft_dataset import create_sft_dataset
 from src.utils.SFTTrainer import TrainerSFT
+from src.utils.DPOTrainer import TrainerDPO
 from src.utils.generate_prompts import generate_new_prompts
 from src.utils.generate_responses import generate_responses
 from src.utils.generate_scores import generate_scores
+from src.utils.generate_preferences import generate_preferences
+from src.utils.generate_dpo_dataset import generate_dpo_dataset
 
 setup_logging()
 logger = logging.getLogger()
@@ -37,6 +40,7 @@ sft_trainer = sft_trainer.train(
 
 iteration = 0
 
+"""
 ###STEP2###
 sft_adapter_path = "/home/ds/workspace/Self-Rewarding-Language-Models/results/results_2024-04-28_16-53-58/sft"
 
@@ -53,7 +57,28 @@ responses_path = generate_responses(model, tokenizer, config, iteration, prompts
 scores_path = generate_scores(model, tokenizer, config, iteration, responses_path)
 ###STEP4###
 
-print(scores_path)
+###STEP5###
+preferences_path = generate_preferences(config, iteration, scores_path)
+###STEP5###
+"""
+
+###STEP6###
+preferences_path = "/home/ds/workspace/Self-Rewarding-Language-Models/src/data/0/preference_pairs.jsonl"
+sft_adapter_path = "/home/ds/workspace/Self-Rewarding-Language-Models/results/results_2024-04-28_16-53-58/sft"
+
+loader = ModelLoader(config, adapter=True, adapter_path=sft_adapter_path)
+model, tokenizer, lora_config = loader.model, loader.tokenizer, loader.lora_config
+
+dpo_dataset = generate_dpo_dataset(preferences_path, tokenizer)
+
+dpo_trainer = TrainerDPO(config=config)
+dpo_adapter_path = dpo_trainer.output_dir
+dpo_trainer = dpo_trainer.train(
+    model=model, tokenizer=tokenizer, lora_config=lora_config, dataset=dpo_dataset
+)
+
+###STEP6###
+
 
 """
 for iteration in range(num_iterations):
