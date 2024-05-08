@@ -20,7 +20,13 @@ config_loader = ConfigLoader()
 config = config_loader.config
 
 os.environ["CUDA_VISIBLE_DEVICES"] = config["cuda_visible_devices"]
-os.environ["WANDB_PROJECT"] = config["wandb_project"]
+if config["wandb_enable"] == True:
+    os.environ["WANDB_PROJECT"] = config["wandb_project"]
+else:
+    os.environ["WANDB_MODE"] = "disabled"
+
+logger.info(f"WandB Enabled: {config['wandb_enable']}")
+
 
 ###STEP1###
 logger.info("Step 0: Training SFT model")
@@ -28,9 +34,9 @@ loader = ModelLoader(config)
 model, tokenizer, lora_config = loader.model, loader.tokenizer, loader.lora_config
 
 dataset = create_sft_dataset(
-    dataset_path=(config["data_path"] / config["ift_dataset"]), tokenizer=tokenizer
+    dataset_path=(config["ift_data_path"] / config["ift_dataset"]), tokenizer=tokenizer
 )
-sft_trainer = TrainerSFT(config=config)
+sft_trainer = TrainerSFT(config=config, iteration=0)
 sft_adapter_path = sft_trainer.output_dir
 sft_trainer = sft_trainer.train(
     model=model, tokenizer=tokenizer, lora_config=lora_config, dataset=dataset
@@ -70,47 +76,12 @@ for iteration in range(config["iterations"]):
     ###STEP5###
 
     ###STEP6###
-    """
-    preferences_path = "/home/ds/workspace/Self-Rewarding-Language-Models/src/data/0/preference_pairs.jsonl"
-    sft_adapter_path = "/home/ds/workspace/Self-Rewarding-Language-Models/results/results_2024-05-07_12-46-38/sft"
-
-    loader = ModelLoader(config, adapter=True, adapter_path=sft_adapter_path)
-    model, tokenizer, lora_config = loader.model, loader.tokenizer, loader.lora_config"""
-
     logger.info(f"Step 5 | iteration {iteration}: Training DPO model")
     dpo_dataset = generate_dpo_dataset(preferences_path, tokenizer)
 
-    dpo_trainer = TrainerDPO(config=config)
+    dpo_trainer = TrainerDPO(config=config, iteration=iteration)
     dpo_adapter_path = dpo_trainer.output_dir
     dpo_trainer = dpo_trainer.train(
         model=model, tokenizer=tokenizer, lora_config=lora_config, dataset=dpo_dataset
     )
-
-###STEP6###
-
-
-"""
-for iteration in range(num_iterations):
-    # Step 1: Self-Instruction Creation
-    new_prompts = generate_new_prompts(model, IFT_data, num_samples)
-    candidate_responses = {}
-
-    for prompt in new_prompts:
-        # Generate multiple candidate responses per new prompt
-        candidate_responses[prompt] = generate_candidate_responses(model, prompt, num_responses)
-        
-        # Self-evaluate responses to assign rewards
-        scores = self_evaluate_responses(model, candidate_responses[prompt])
-    
-    # Step 2: Build preference pairs from the self-evaluated responses
-    preference_pairs = build_preference_pairs(candidate_responses, scores)
-
-    # Step 3: Instruction Following Training using Direct Preference Optimization (DPO)
-    model = train_with_DPO(model, preference_pairs)
-
-    # Optionally, update the IFT and EFT datasets with new generated data
-    update_datasets(IFT_data, EFT_data, candidate_responses, scores)
-
-# Save the final model
-model.save('self_rewarding_model_final')
-"""
+    ###STEP6###
