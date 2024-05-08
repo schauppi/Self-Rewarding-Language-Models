@@ -7,10 +7,16 @@ from accelerate import Accelerator
 
 
 class TrainerDPO:
-    def __init__(self, config):
-        self.output_dir = str(config["experiment_dir"] / "dpo")
+    def __init__(self, config, iteration):
+        self.output_dir = str(
+            config["experiment_dir"] / "dpo" / f"iteration_{iteration}"
+        )
         self.accelerator = Accelerator()
         self.dpo_training_params = config["dpo_training"]
+        if config["wandb_enable"] == True:
+            self.report_to = "wandb"
+        else:
+            self.report_to = None
 
     def train(self, model, tokenizer, lora_config, dataset):
         learning_rate = float(self.dpo_training_params["learning_rate"])
@@ -29,8 +35,7 @@ class TrainerDPO:
             num_train_epochs=1,
             lr_scheduler_type="cosine",
             optim="paged_adamw_32bit",
-            save_steps=50,
-            report_to="wandb",
+            report_to=self.report_to,
         )
 
         trainer = DPOTrainer(
@@ -46,6 +51,4 @@ class TrainerDPO:
         model, trainer = self.accelerator.prepare(model, trainer)
 
         trainer.train()
-
-        output_dir = os.path.join(self.output_dir, "model")
-        trainer.model.save_pretrained(output_dir)
+        trainer.model.save_pretrained(self.output_dir)

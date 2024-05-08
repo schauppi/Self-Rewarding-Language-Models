@@ -32,15 +32,19 @@ class ConfigLoader:
 
     def setup_paths(self):
         base_path = Path(
-            os.getenv("PROJECT_BASE_PATH", Path(__file__).resolve().parent.parent)
+            os.getenv(
+                "PROJECT_BASE_PATH", Path(__file__).resolve().parent.parent.parent
+            )
         )
         self.logger.info(f"Base path set to: {base_path}")
-        self.config["data_path"] = (base_path / self.config["data_directory"]).resolve()
+        self.config["ift_data_path"] = (
+            base_path / self.config["data_directory"]
+        ).resolve()
         self.config["model_dir_path"] = (
             base_path / self.config["model_directory"]
         ).resolve()
 
-        self.logger.info(f"Data path set to: {self.config['data_path']}")
+        self.logger.info(f"IFT Data path set to: {self.config['ift_data_path']}")
         self.logger.info(
             f"Model directory path set to: {self.config['model_dir_path']}"
         )
@@ -62,6 +66,9 @@ class ConfigLoader:
                 f"Experiment directory set to: {self.config['experiment_dir']}"
             )
             os.makedirs(self.config["experiment_dir"], exist_ok=True)
+            self.config["data_path"] = self.config["experiment_dir"] / "data"
+            self.logger.info(f"Data path set to: {self.config['data_path']}")
+            os.makedirs(self.config["data_path"], exist_ok=True)
         except Exception as e:
             self.logger.error(f"Error: {e}")
             raise e

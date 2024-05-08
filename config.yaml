@@ -1,12 +1,13 @@
 # Static configuration
-cuda_visible_devices: "0"
+cuda_visible_devices: "0, 1"
 model_name: "mistralai/Mistral-7B-v0.1"
 tokenizer_name: "mistralai/Mistral-7B-v0.1"
 
 data_directory: "data"
-ift_dataset: "ift_short.jsonl"
+ift_dataset: "ift.jsonl"
 model_directory: "results"
 
+wandb_enable: True
 wandb_project: "Self Rewarding Language Models"
 
 peft_config:

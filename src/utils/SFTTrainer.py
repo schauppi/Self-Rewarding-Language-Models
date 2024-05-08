@@ -7,10 +7,16 @@ from accelerate import Accelerator
 
 
 class TrainerSFT:
-    def __init__(self, config):
-        self.output_dir = str(config["experiment_dir"] / "sft")
+    def __init__(self, config, iteration=0):
+        self.output_dir = str(
+            config["experiment_dir"] / "sft" / f"iteration_{iteration}"
+        )
         self.accelerator = Accelerator()
         self.sft_training_params = config["sft_training"]
+        if config["wandb_enable"] == True:
+            self.report_to = "wandb"
+        else:
+            self.report_to = None
 
     def train(self, model, tokenizer, lora_config, dataset):
         learning_rate = float(self.sft_training_params["learning_rate"])
@@ -28,8 +34,7 @@ class TrainerSFT:
             num_train_epochs=1,
             lr_scheduler_type="cosine",
             optim="paged_adamw_32bit",
-            save_steps=50,
-            report_to="wandb",
+            report_to=self.report_to,
         )
 
         trainer = SFTTrainer(

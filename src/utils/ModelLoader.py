@@ -6,7 +6,6 @@ from peft import (
     TaskType,
     prepare_model_for_kbit_training,
     load_peft_weights,
-    set_peft_model_state_dict,
 )
 
 

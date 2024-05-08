@@ -7,7 +7,7 @@ from src.utils.prompts import judge_prompt
 from src.utils.logging.logging_config import setup_logging
 
 setup_logging()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 def do_sample(model, tokenizer, prompt):

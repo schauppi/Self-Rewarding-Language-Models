@@ -10,7 +10,7 @@ from src.utils.prompts import prompt_step_01
 from src.utils.logging.logging_config import setup_logging
 
 setup_logging()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 def get_random_prompts(data, num_prompts=5):
@@ -89,7 +89,7 @@ def generate(model, tokenizer, ift_data, new_prompts_to_generate):
 def generate_new_prompts(model, tokenizer, config, iteration):
     try:
         logger.info(f"Generating new prompts for iteration {iteration}")
-        ift_data = read_jsonl_file(config["data_path"] / config["ift_dataset"])
+        ift_data = read_jsonl_file(config["ift_data_path"] / config["ift_dataset"])
         new_prompts = generate(
             model=model,
             tokenizer=tokenizer,
