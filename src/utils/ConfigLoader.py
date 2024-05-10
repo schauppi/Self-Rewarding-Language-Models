@@ -1,20 +1,46 @@
-from src.utils.logging.logging_config import setup_logging
 import logging
 import yaml
 from pathlib import Path
 import os
 import datetime
 
+from src.utils.logging.logging_config import setup_logging
+
 
 class ConfigLoader:
-    def __init__(self, config_file="config.yaml"):
-        setup_logging()
-        self.logger = logging.getLogger()
+    """
+    Class for loading the configuration file and setting up paths.
+
+    Methods:
+    load_config: Loads the configuration file.
+    setup_paths: Sets up the paths for the project based on the configuration.
+    setup_experiment_dir: Sets up the experiment directory based on the configuration.
+    """
+
+    def __init__(self, config_file: str = "config.yaml"):
+        try:
+
+            setup_logging()
+            self.logger = logging.getLogger()
+        except ImportError:
+            print(
+                "Module 'src.utils.logging.logging_config' not found. Logging setup skipped."
+            )
+
         self.config = self.load_config(config_file)
         self.setup_paths()
         self.setup_experiment_dir()
 
-    def load_config(self, config_file):
+    def load_config(self, config_file: str) -> dict:
+        """
+        Loads the configuration file.
+
+        Args:
+            config_file: The name of the configuration file.
+
+        Returns:
+            The loaded configuration as a dictionary.
+        """
         config_path = Path(
             os.getenv(
                 "PROJECT_CONFIG_PATH",
@@ -31,6 +57,9 @@ class ConfigLoader:
             return yaml.safe_load(file)
 
     def setup_paths(self):
+        """
+        Sets up the paths for the project based on the configuration.
+        """
         base_path = Path(
             os.getenv(
                 "PROJECT_BASE_PATH", Path(__file__).resolve().parent.parent.parent
@@ -50,6 +79,9 @@ class ConfigLoader:
         )
 
     def setup_experiment_dir(self):
+        """
+        Sets up the experiment directory based on the configuration.
+        """
         try:
             base_path = Path(
                 os.getenv(

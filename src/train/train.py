@@ -5,8 +5,8 @@ from src.utils.logging.logging_config import setup_logging
 from src.utils.ModelLoader import ModelLoader
 from src.utils.ConfigLoader import ConfigLoader
 from src.utils.create_sft_dataset import create_sft_dataset
-from src.utils.SFTTrainer import TrainerSFT
-from src.utils.DPOTrainer import TrainerDPO
+from src.utils.Trainer.SFTTrainer import TrainerSFT
+from src.utils.Trainer.DPOTrainer import TrainerDPO
 from src.utils.generate_prompts import generate_new_prompts
 from src.utils.generate_responses import generate_responses
 from src.utils.generate_scores import generate_scores

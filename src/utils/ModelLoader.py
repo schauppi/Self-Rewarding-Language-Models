@@ -1,3 +1,4 @@
+from typing import Tuple, Dict, Any, Union
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import (
@@ -8,13 +9,36 @@ from peft import (
     load_peft_weights,
 )
 
-
 from src.utils.logging.logging_config import setup_logging
 import logging
 
 
 class ModelLoader:
-    def __init__(self, config, adapter=False, adapter_path=None):
+    """
+    Class to load the model and tokenizer.
+
+    Methods:
+        get_bnb_config: Loads the BitsAndBytesConfig.
+        load_tokenizer: Loads the Tokenizer.
+        load_model: Loads the Model.
+        create_peft_config: Creates the PEFT Config.
+        get_model_and_config: Returns the Model and Config.
+    """
+
+    def __init__(
+        self,
+        config: Dict[str, Any],
+        adapter: bool = False,
+        adapter_path: Union[str, None] = None,
+    ):
+        """
+        Initialize the ModelLoader with the given configuration.
+
+        Args:
+            config: The configuration dictionary.
+            adapter: Whether to use an adapter.
+            adapter_path: The path to the adapter, if one is being used.
+        """
         self.model_name = config["model_name"]
         self.tokenizer_name = config["tokenizer_name"]
         self.peft_config = config["peft_config"]
@@ -27,7 +51,13 @@ class ModelLoader:
         self.model = self.load_model()
         self.lora_config = self.create_peft_config()
 
-    def get_bnb_config(self):
+    def get_bnb_config(self) -> BitsAndBytesConfig:
+        """
+        Load the BitsAndBytesConfig.
+
+        Returns:
+            The loaded BitsAndBytesConfig.
+        """
         self.logger.info("Loading BitsAndBytesConfig")
         try:
             return BitsAndBytesConfig(
@@ -39,7 +69,13 @@ class ModelLoader:
             self.logger.error(f"Error loading BitsAndBytesConfig: {e}")
             raise
 
-    def load_tokenizer(self):
+    def load_tokenizer(self) -> AutoTokenizer:
+        """
+        Load the Tokenizer.
+
+        Returns:
+            The loaded Tokenizer.
+        """
         self.logger.info("Loading Tokenizer")
         try:
             tokenizer = AutoTokenizer.from_pretrained(
@@ -52,7 +88,13 @@ class ModelLoader:
             self.logger.error(f"Error loading Tokenizer: {e}")
             raise
 
-    def load_model(self):
+    def load_model(self) -> AutoModelForCausalLM:
+        """
+        Load the Model.
+
+        Returns:
+            The loaded Model.
+        """
         self.logger.info("Loading Model")
         try:
             model = AutoModelForCausalLM.from_pretrained(
@@ -68,7 +110,13 @@ class ModelLoader:
             self.logger.error(f"Error loading Model: {e}")
             raise
 
-    def create_peft_config(self):
+    def create_peft_config(self) -> LoraConfig:
+        """
+        Create the PEFT Config.
+
+        Returns:
+            The created PEFT Config.
+        """
         self.logger.info("Creating PEFT Config")
         try:
             peft_config = LoraConfig(
@@ -88,7 +136,13 @@ class ModelLoader:
             self.logger.error(f"Error creating PEFT Config: {e}")
             raise
 
-    def get_model_and_config(self):
+    def get_model_and_config(self) -> Tuple[AutoModelForCausalLM, LoraConfig]:
+        """
+        Return the Model and Config.
+
+        Returns:
+            A tuple containing the Model and Config.
+        """
         self.logger.info("Returning Model and Config")
         try:
             return self.model, self.lora_config

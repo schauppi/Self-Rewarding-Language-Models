@@ -4,6 +4,8 @@ import uuid
 import logging
 from transformers import TextStreamer
 import os
+from typing import List, Dict, Any, Union
+from transformers import PreTrainedTokenizer, PreTrainedModel
 
 from src.utils.read_write_jsonl import read_jsonl_file, write_jsonl_file
 from src.utils.prompts import prompt_step_01
@@ -13,7 +15,17 @@ setup_logging()
 logger = logging.getLogger()
 
 
-def get_random_prompts(data, num_prompts=5):
+def get_random_prompts(data: pd.DataFrame, num_prompts: int = 5) -> List[str]:
+    """
+    Gets a random sample of prompts from the data.
+
+    Args:
+        data: The data to get the prompts from.
+        num_prompts: The number of prompts to get.
+
+    Returns:
+        A list of random prompts.
+    """
     try:
         return data.sample(n=num_prompts)["prompt"].tolist()
     except Exception as e:
@@ -21,7 +33,16 @@ def get_random_prompts(data, num_prompts=5):
         return []
 
 
-def generate_prompt(examples):
+def generate_prompt(examples: List[str]) -> str:
+    """
+    Generates a prompt from the examples.
+
+    Args:
+        examples: The examples to generate the prompt from.
+
+    Returns:
+        The generated prompt.
+    """
     global prompt_step_01
     try:
         for _, item in enumerate(examples):
@@ -32,7 +53,16 @@ def generate_prompt(examples):
         return prompt_step_01
 
 
-def extract_prompt(answer):
+def extract_prompt(answer: str) -> List[str]:
+    """
+    Extracts the prompts from the answer.
+
+    Args:
+        answer: The answer to extract the prompts from.
+
+    Returns:
+        A list of extracted prompts.
+    """
     prompts = []
     try:
         extracted_prompts = re.findall(r"<task>\|(.*?)</task>", answer, re.DOTALL)
@@ -43,7 +73,20 @@ def extract_prompt(answer):
     return prompts
 
 
-def do_sample(model, tokenizer, task_prompts):
+def do_sample(
+    model: PreTrainedModel, tokenizer: PreTrainedTokenizer, task_prompts: List[str]
+) -> str:
+    """
+    Samples from the model using the task prompts.
+
+    Args:
+        model: The model to sample from.
+        tokenizer: The tokenizer to use.
+        task_prompts: The task prompts to use.
+
+    Returns:
+        The sampled text.
+    """
     try:
         prompt = generate_prompt(task_prompts)
         model_inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
@@ -65,7 +108,24 @@ def do_sample(model, tokenizer, task_prompts):
         return ""
 
 
-def generate(model, tokenizer, ift_data, new_prompts_to_generate):
+def generate(
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizer,
+    ift_data: pd.DataFrame,
+    new_prompts_to_generate: int,
+) -> List[Dict[str, Any]]:
+    """
+    Generates new prompts using the model and tokenizer.
+
+    Args:
+        model: The model to use.
+        tokenizer: The tokenizer to use.
+        ift_data: The IFT data to use.
+        new_prompts_to_generate: The number of new prompts to generate.
+
+    Returns:
+        A list of new prompts.
+    """
     uniq_prompts = set()
     new_prompts = []
     try:
@@ -86,7 +146,24 @@ def generate(model, tokenizer, ift_data, new_prompts_to_generate):
         return []
 
 
-def generate_new_prompts(model, tokenizer, config, iteration):
+def generate_new_prompts(
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizer,
+    config: Dict[str, Any],
+    iteration: int,
+) -> Union[str, None]:
+    """
+    Generates new prompts for the given iteration and saves them to the output path.
+
+    Args:
+        model: The model to use.
+        tokenizer: The tokenizer to use.
+        config: The configuration dictionary.
+        iteration: The current iteration.
+
+    Returns:
+        The output path where the new prompts were saved, or None if an error occurred.
+    """
     try:
         logger.info(f"Generating new prompts for iteration {iteration}")
         ift_data = read_jsonl_file(config["ift_data_path"] / config["ift_dataset"])
