@@ -4,7 +4,7 @@ model_name: "mistralai/Mistral-7B-v0.1"
 tokenizer_name: "mistralai/Mistral-7B-v0.1"
 
 data_directory: "data"
-ift_dataset: "ift.jsonl"
+ift_dataset: "ift_short.jsonl"
 model_directory: "results"
 
 wandb_enable: True
