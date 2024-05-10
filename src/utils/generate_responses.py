@@ -2,6 +2,8 @@ import logging
 import os
 from transformers import TextStreamer
 import pandas as pd
+from typing import List, Dict, Any, Union
+from transformers import PreTrainedTokenizer, PreTrainedModel
 
 from src.utils.logging.logging_config import setup_logging
 
@@ -9,7 +11,16 @@ setup_logging()
 logger = logging.getLogger()
 
 
-def trim_completion(completion):
+def trim_completion(completion: str) -> str:
+    """
+    Trims the completion to remove any trailing newlines.
+
+    Args:
+        completion: The completion to trim.
+
+    Returns:
+        The trimmed completion.
+    """
     try:
         if "\n" in completion:
             last_newline = completion.rfind("\n")
@@ -22,7 +33,16 @@ def trim_completion(completion):
         return ""
 
 
-def extract_completion(answer):
+def extract_completion(answer: str) -> str:
+    """
+    Extracts the completion from the answer.
+
+    Args:
+        answer: The answer to extract the completion from.
+
+    Returns:
+        The extracted completion.
+    """
     try:
         pattern = f"[/INST]"
         parts = answer.split(pattern)
@@ -35,7 +55,20 @@ def extract_completion(answer):
         return ""
 
 
-def do_sample(model, tokenizer, prompt):
+def do_sample(
+    model: PreTrainedModel, tokenizer: PreTrainedTokenizer, prompt: str
+) -> str:
+    """
+    Samples from the model using the prompt.
+
+    Args:
+        model: The model to sample from.
+        tokenizer: The tokenizer to use.
+        prompt: The prompt to use.
+
+    Returns:
+        The sampled text.
+    """
     try:
         prompt_sample = [{"role": "user", "content": prompt}]
         model_prompt = tokenizer.apply_chat_template(prompt_sample, tokenize=False)
@@ -60,7 +93,23 @@ def do_sample(model, tokenizer, prompt):
         return ""
 
 
-def generate(model, tokenizer, gen_prompts, responses_to_generate, output_path):
+def generate(
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizer,
+    gen_prompts: pd.DataFrame,
+    responses_to_generate: int,
+    output_path: str,
+) -> None:
+    """
+    Generates responses for the given prompts and saves them to the output path.
+
+    Args:
+        model: The model to use.
+        tokenizer: The tokenizer to use.
+        gen_prompts: The prompts to generate responses for.
+        responses_to_generate: The number of responses to generate per prompt.
+        output_path: The path to save the generated responses to.
+    """
     logger.info(f"Generating {responses_to_generate} responses per prompt")
     completions = []
     try:
@@ -91,7 +140,26 @@ def generate(model, tokenizer, gen_prompts, responses_to_generate, output_path):
         logger.error(f"Error in generate: {e}")
 
 
-def generate_responses(model, tokenizer, config, iteration, prompts_path):
+def generate_responses(
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizer,
+    config: Dict[str, Any],
+    iteration: int,
+    prompts_path: str,
+) -> Union[str, None]:
+    """
+    Generates responses for the given iteration and saves them to the output path.
+
+    Args:
+        model: The model to use.
+        tokenizer: The tokenizer to use.
+        config: The configuration dictionary.
+        iteration: The current iteration.
+        prompts_path: The path to the prompts.
+
+    Returns:
+        The output path where the responses were saved, or None if an error occurred.
+    """
     try:
         logger.info(f"Generating responses for iteration {iteration}")
         output_dir = config["data_path"] / f"{iteration}"

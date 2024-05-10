@@ -2,6 +2,8 @@ import os
 import logging
 import re
 import pandas as pd
+from typing import List, Dict, Any, Union
+from transformers import PreTrainedTokenizer, PreTrainedModel
 
 from src.utils.prompts import judge_prompt
 from src.utils.logging.logging_config import setup_logging
@@ -10,7 +12,20 @@ setup_logging()
 logger = logging.getLogger()
 
 
-def do_sample(model, tokenizer, prompt):
+def do_sample(
+    model: PreTrainedModel, tokenizer: PreTrainedTokenizer, prompt: str
+) -> str:
+    """
+    Samples from the model using the prompt.
+
+    Args:
+        model: The model to sample from.
+        tokenizer: The tokenizer to use.
+        prompt: The prompt to use.
+
+    Returns:
+        The sampled text.
+    """
     try:
         prompt_sample = [{"role": "user", "content": prompt}]
         model_prompt = tokenizer.apply_chat_template(prompt_sample, tokenize=False)
@@ -33,7 +48,16 @@ def do_sample(model, tokenizer, prompt):
         return ""
 
 
-def extract_scores(answer):
+def extract_scores(answer: str) -> int:
+    """
+    Extracts the score from the answer.
+
+    Args:
+        answer: The answer to extract the score from.
+
+    Returns:
+        The extracted score.
+    """
     try:
         pattern = r"[Ss]core: ([0-5])"
         matches = re.findall(pattern, answer)
@@ -44,7 +68,21 @@ def extract_scores(answer):
         return -1
 
 
-def generate(model, tokenizer, gen_respones, output_path):
+def generate(
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizer,
+    gen_respones: pd.DataFrame,
+    output_path: str,
+) -> None:
+    """
+    Generates responses for the given prompts and saves them to the output path.
+
+    Args:
+        model: The model to use.
+        tokenizer: The tokenizer to use.
+        gen_respones: The responses to generate scores for.
+        output_path: The path to save the generated scores to.
+    """
     results = []
     try:
         for _, row in gen_respones.iterrows():
@@ -74,7 +112,26 @@ def generate(model, tokenizer, gen_respones, output_path):
         logger.error(f"Error in generate: {e}")
 
 
-def generate_scores(model, tokenizer, config, iteration, responses_path):
+def generate_scores(
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizer,
+    config: Dict[str, Any],
+    iteration: int,
+    responses_path: str,
+) -> Union[str, None]:
+    """
+    Generates scores for the given iteration and saves them to the output path.
+
+    Args:
+        model: The model to use.
+        tokenizer: The tokenizer to use.
+        config: The configuration dictionary.
+        iteration: The current iteration.
+        responses_path: The path to the responses.
+
+    Returns:
+        The output path where the scores were saved, or None if an error occurred.
+    """
     try:
         logger.info(f"Generating scores for iteration {iteration}")
         output_dir = config["data_path"] / f"{iteration}"
