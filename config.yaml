@@ -4,7 +4,7 @@ model_name: "mistralai/Mistral-7B-v0.1"
 tokenizer_name: "mistralai/Mistral-7B-v0.1"
 
 data_directory: "data"
-ift_dataset: "ift_short.jsonl"
+ift_dataset: "ift.jsonl"
 model_directory: "results"
 
 wandb_enable: True
@@ -35,7 +35,7 @@ dpo_training:
   max_prompt_length: 1024
 
 generate_prompts:
-  new_prompts: 4
+  new_prompts: 500
 
 response_prompts:
   new_prompts: 4
